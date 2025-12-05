@@ -15,7 +15,9 @@
                 <!-- /.card-tools -->
 
                     <div class="card-tools">
-                        <a href="{{ url('admin/servicios/create') }}" class="btn btn-primary">Crear nuevo</a>
+                            @if (in_array($usuario->role, ['admin', 'super_admin']))
+                                <a href="{{ url('admin/servicios/create') }}" class="btn btn-primary">Crear nuevo</a>
+                            @endif
                     </div>
 
                 </div>
@@ -27,7 +29,10 @@
                                     <th style="text-align: center">#</th>
                                     <th style="text-align: center">Nombre</th>
                                     <th style="text-align: center">Valor</th>
-                                    <th style="text-align: center">Acciones</th>
+
+                                    @if (in_array($usuario->role, ['admin', 'super_admin']))
+                                        <th style="text-align: center">Acciones</th>
+                                    @endif
                                 </tr>
                             </thead>
 
@@ -41,6 +46,8 @@
                                         <td style="text-align: center">{{ $contador_servicio++ }}</td>
                                         <td style="text-align: center">{{ $servicio->nombre }}</td>
                                         <td style="text-align: center">{{ $servicio->valor }}</td>
+
+                                        @if (in_array($usuario->role, ['admin', 'super_admin']))
                                         <td style="text-align: center" class="text-center">
                                             <div class="btn-group" role="group" aria-label="Basic mixed styles example">
                                                 <a href="{{ url('/admin/servicios/edit',$servicio->id) }}" class="btn btn-success btn-sm"><i class="bi bi-pencil-fill"></i></a>
@@ -70,6 +77,8 @@
                                                     }
                                                 </script>
                                         </td>
+                                        @endif
+
                                     </tr>
                                 @endforeach
                             </tbody>

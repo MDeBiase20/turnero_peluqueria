@@ -64,6 +64,7 @@ return [
     */
 
     'logo' => '<b>Admin</b>LTE',
+    'logo_url' => '/admin',
     'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
@@ -338,6 +339,13 @@ return [
             'text' => 'Servicios',
             'url' => 'admin/servicios',
             'icon' => 'fas fa-fw bi-card-checklist',
+            'classes'=>'bg-blue text-white'
+        ],
+
+        [
+            'text' => 'Reservas',
+            'url' => 'admin/reservas',
+            'icon' => 'fas fa-fw bi-calendar3',
             'classes'=>'bg-blue text-white'
         ],
 

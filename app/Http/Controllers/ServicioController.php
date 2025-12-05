@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Servicio;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ServicioController extends Controller
@@ -12,8 +13,9 @@ class ServicioController extends Controller
      */
     public function index()
     {
+        $usuario = auth()->user();
         $servicios = Servicio::all();
-        return view('admin.servicios.index', compact('servicios'));
+        return view('admin.servicios.index', compact('servicios', 'usuario'));
     }
 
     /**
