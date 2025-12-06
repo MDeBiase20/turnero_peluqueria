@@ -33,3 +33,9 @@ Route::post('/admin/reservas/create', [App\Http\Controllers\ReservaController::c
 Route::get('/admin/reservas/edit/{id}', [App\Http\Controllers\ReservaController::class, 'edit'])->name('admin.reservas.edit')->middleware('auth');
 Route::put('/admin/reservas/{id}', [App\Http\Controllers\ReservaController::class, 'update'])->name('admin.reservas.update')->middleware('auth');
 Route::delete('/admin/reservas/{id}', [App\Http\Controllers\ReservaController::class, 'destroy'])->name('admin.reservas.destroy')->middleware('auth');
+
+//Ruta para mostrar el calendario de reservas
+Route::get('/reservas/calendario', [App\Http\Controllers\ReservaController::class, 'calendario'])->name('reservas.calendario')->middleware('auth');
+
+// Cambiar estado de turno
+Route::post('/reservas/cambiar-estado', [App\Http\Controllers\ReservaController::class, 'cambiarEstado'])->name('reservas.cambiarEstado')->middleware('auth');

@@ -166,12 +166,11 @@ class ReservaController extends Controller
         }
 
         //Obtenemos los datos de la fecha, hora y el usuario autenticado
-        $fecha = Carbon::parse($request->input('fecha'));
-        $hora = $request->input('hora');
+        $fechaTurno = Carbon::parse($request->input('fecha') . ' ' . $request->input('hora_reserva'));
         $user = auth()->user();
 
         //Verificamos que la fecha no sea en el pasado
-        if($fecha->isBefore(Carbon::now())){
+        if($fechaTurno->isBefore(Carbon::now())){
             return redirect()->back()
                 ->with('mensaje', 'No se puede registrar un turno en fechas pasadas.')
                 ->with('icono', 'error')
@@ -274,6 +273,59 @@ class ReservaController extends Controller
         $reserva->delete();
         return redirect()->route('admin.reservas.index')
             ->with('mensaje', 'Reserva eliminada exitosamente.')
+            ->with('icono', 'success');
+    }
+
+    //Función para mostrar el calendario de reservas
+    public function calendario()
+    {
+        $usuario_id = Auth::id();
+        //Obtenemos las reservas del usuario autenticado
+        $reservas = Reserva::all();
+
+        $eventos = $reservas->map(function($reserva){
+            $color = match ($reserva->estado) {
+                'Confirmado' => '#28a745',  // Verde
+                'Cancelado' => '#dc3545',   // Rojo
+                'Finalizado' => '#007bff',  // Azul
+            };
+
+            return[
+                'id' => $reserva->id,
+                'title' => $reserva->servicio->nombre,
+                'start' => $reserva->fecha_reserva . 'T' . substr($reserva->hora_reserva, 0,5),
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                'extendedProps' => [
+                    'nombre' => $reserva->user->name,
+                    'servicio' => $reserva->servicio->nombre,
+                    'ref_celular' => $reserva->ref_celular,
+                    'estado' => $reserva->estado,
+                    'comprobante_pago' => $reserva->comprobante_pago,
+                ],
+            ];
+        });
+
+        return response()->json($eventos);
+    }
+
+    //Función para cambiar el estado de un turno
+    public function cambiarEstado(Request $request)
+    {
+
+        // $datos = $request->all();
+        // return response()->json($datos);
+
+        $request->validate([
+            'reserva_id' => 'required|exists:reservas,id',
+            'estado' => 'required|in:Confirmado,Cancelado,Finalizado',
+        ]);
+        $reserva = Reserva::findOrFail($request->reserva_id);
+        $reserva->estado = $request->estado;
+        $reserva->save();
+
+        return redirect()->route('admin.reservas.index')
+            ->with('mensaje', 'Estado del turno actualizado exitosamente.')
             ->with('icono', 'success');
     }
 }

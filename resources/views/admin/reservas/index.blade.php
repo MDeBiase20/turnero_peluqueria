@@ -12,6 +12,78 @@
     <div id='calendar'></div>
 @endif
 
+<!-- Modal para las reservas-->
+    <div class="modal fade" id="modalTurno" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="exampleModalLabel">Detalle del turno</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            <div class="modal-body">
+                <div class="row">
+                            <!-- PDF arriba ocupando ancho completo -->
+                            <div class="mb-3 text-center">
+                                <iframe id="comprobanteTurno"
+                                        src=""
+                                        style="width: 100%; height: 350px; border:1px solid #ddd; border-radius:8px;"
+                                        frameborder="0">
+                                </iframe>
+                            </div>
+
+                            <div class="col-md-8">
+                                <p><strong>Nombre:</strong> <span id="nombreTurno"></span></p>
+                                <p><strong>Teléfono:</strong> <span id="telefonoTurno"></span></p>
+                                <p><strong>Servicio:</strong> <span id="servicioTurno"></span></p>
+                                <p><strong>Fecha y hora:</strong> <span id="fechaTurno"></span></p>
+                                <p><strong>Estado:</strong> <span id="estadoTurno"></span></p>
+                            </div>
+                        </div>
+            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <!-- Botón para abrir el modal de estado -->
+                    <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#modalEstadoTurno" id="btnCambiarEstado">Cambiar Estado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cambiar Estado -->
+        <div class="modal fade" id="modalEstadoTurno" tabindex="-1" aria-labelledby="modalEstadoTurnoLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form id="formCambiarEstado" method="POST" action="{{ url('reservas/cambiar-estado') }}">
+                            @csrf
+                                <div class="modal-header bg-success text-white">
+                                    <h5 class="modal-title" id="modalEstadoTurnoLabel">Actualizar Estado del Turno</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="reserva_id" name="reserva_id">
+
+                                <div class="mb-3">
+                                    <label for="estado" class="form-label">Estado</label>
+                                    <select class="form-select form-control" id="estado_turno" name="estado" required>
+                                    <option value="Confirmado">Confirmado</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                    <option value="Finalizado">Finalizado</option>
+                                    </select>
+                                </div>
+                            </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                    <button type="submit" class="btn btn-success">Actualizar</button>
+                                </div>
+                        </form>    
+                        
+                    </div>
+                </div>
+        </div>
+
 @if (in_array($usuario->role, ['cliente']))
     <div class="row">
         <div class="col-md-6">
@@ -155,4 +227,55 @@
                             })
     
 </script>
+
+{{-- Script para mostrar desde el calendario los turnos --}}
+<script>
+    document.addEventListener('DOMContentLoaded',function(){
+        var calendarEl = document.getElementById('calendar');
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            locale: 'es',
+            initialView: 'dayGridMonth',
+            events: '{{ url("/reservas/calendario") }}',
+
+            eventClick: function(info){
+                
+                //Evitar redirección por defecto
+                info.jsEvent.preventDefault();
+
+                //Lenamos los datos del modal
+                document.getElementById('nombreTurno').textContent = info.event.extendedProps.nombre;
+                document.getElementById('telefonoTurno').textContent  = info.event.extendedProps.ref_celular;
+                document.getElementById('servicioTurno').textContent  = info.event.extendedProps.servicio;
+                document.getElementById('fechaTurno').textContent  = info.event.start.toLocaleString();
+                document.getElementById('estadoTurno').textContent  = info.event.extendedProps.estado;
+
+                    // Mostrar comprobante de pago
+                    let comprobante = info.event.extendedProps.comprobante_pago;
+                    
+                    if (comprobante) {
+                        document.getElementById('comprobanteTurno').src = '/turneropeluqueria/public/storage/' + comprobante;
+                    } else {
+                        document.getElementById('comprobanteTurno').src = '';
+                    }
+
+                    // Guardamos el id del turno para el modal de estado
+                    document.getElementById('reserva_id').value = info.event.id;
+                    document.getElementById('estado_turno').value = info.event.extendedProps.estado ?? 'Confirmado';
+
+                    // 👉 Mostrar modal principal
+                    $('#modalTurno').modal('show');
+
+                    // //Modal del estado
+                    // document.getElementById('btnCambiarEstado').onclick = function(){
+                    //     var modalEstado = new bootstrap.Modal(document.getElementById('modalEstadoTurno'));
+                    //     modalEstado.show();
+                    // }
+            }
+        })
+
+        calendar.render();
+    })
+</script>
+
 @stop

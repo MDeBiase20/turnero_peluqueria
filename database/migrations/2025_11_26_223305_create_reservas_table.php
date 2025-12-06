@@ -26,7 +26,7 @@ return new class extends Migration
             $table->time('hora_reserva');
 
             // estado del turno
-            $table->enum('estado', ['Pendiente', 'Confirmado', 'Cancelado'])->default('Confirmado');
+            $table->enum('estado', ['Confirmado', 'Cancelado', 'Finalizado'])->default('Confirmado');
             $table->text('comprobante_pago');
             $table->string('ref_celular');
 
